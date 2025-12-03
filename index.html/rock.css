@@ -680,23 +680,55 @@
             box-shadow: 0 10px 20px rgba(212,175,55,0.3);
         }
 
-        footer {
-            background: var(--dark);
-            color: white;
-            padding: 2rem 5%;
-            text-align: center;
-        }
+   footer {
+    text-align: center;
+    padding: 20px;
+    background: var(--dark);
+    color: #ccc;
+    font-family: 'Montserrat', sans-serif;
+}
 
-        footer p {
-            font-family: 'Montserrat', sans-serif;
-            letter-spacing: 1px;
-        }
+footer .creator {
+    margin-top: 8px;
+    font-size: 0.95rem;
+    color: #ccc;
+}
+
+footer .creator a {
+    color: var(--gold);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+footer .creator a:hover {
+    text-decoration: underline;
+}
+
+.color-cycle {
+    color: #D4AF37; /* fallback for non-supporting browsers */
+    background: linear-gradient(90deg, #D4AF37, #ff4d4d, #4da6ff, #39e639, #D4AF37);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: colorFlow 6s linear infinite;
+}
+
+
+@keyframes colorFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+
+
 
 .gallery-item {
     position: relative;
     cursor: pointer;
     overflow: hidden;
 }
+
 
 .gallery-preview {
     width: 100%;
@@ -719,6 +751,9 @@
 
 
 /* MODAL */
+/* ============================
+   MODAL OVERLAY
+============================ */
 .modal {
     position: fixed;
     inset: 0;
@@ -728,31 +763,40 @@
     align-items: center;
     z-index: 2000;
     padding: 20px;
+    touch-action: none; /* Prevent accidental zooming on mobile */
 }
 
 .modal.active {
     display: flex;
 }
 
+/* ============================
+   BACK ARROW (TOP LEFT)
+============================ */
 .modal-header {
-    position: absolute;
+    position: fixed; /* changed from absolute */
     top: 20px;
     left: 20px;
-    z-index: 3000;
+    z-index: 5000; /* above everything */
 }
 
 .back-arrow {
     font-size: 18px;
     background: white;
     color: black;
-    padding: 8px 14px;
-    border-radius: 8px;
+    padding: 10px 16px; /* slightly larger for better visibility */
+    border-radius: 10px;
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     user-select: none;
+    display: inline-block;   /* ensures full box shows */
 }
 
+
+/* ============================
+   MODAL CONTENT
+============================ */
 .modal-content {
     position: relative;
     width: 100%;
@@ -765,6 +809,9 @@
     border-radius: 12px;
 }
 
+/* ============================
+   IMAGE SLIDER
+============================ */
 .modal-slider {
     display: flex;
     width: 100%;
@@ -773,13 +820,19 @@
 
 .modal-slider img {
     width: 100%;
-    max-width: 100%;
     height: auto;
-    display: block;
+    max-height: 85vh;
     object-fit: contain;
-    margin: 0 auto;
+
+    /* PERFECT CENTER ON IOS/ANDROID */
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
+/* ============================
+   DOT INDICATORS
+============================ */
 .modal-dots {
     display: flex;
     gap: 10px;
@@ -793,48 +846,37 @@
     background: rgba(255,255,255,0.5);
     border-radius: 50%;
     cursor: pointer;
+    transition: 0.3s;
 }
 
 .modal-dots .dot.active {
     background: white;
+    transform: scale(1.2);
 }
 
-/* MOBILE ADJUSTMENTS */
+/* ============================
+   MOBILE OPTIMIZATION
+============================ */
 @media (max-width: 768px) {
+
     .modal-content {
-        max-width: 90%;
+        max-width: 92%;
     }
 
     .modal-slider img {
         max-height: 80vh;
     }
 
-    .back-arrow {
-        top: 10px;
+    .modal-header {
+        top: env(safe-area-inset-top, 10px);
         left: 10px;
-        padding: 6px 12px;
     }
-}
 
-
-
-
-
-.modal {
-    display: none;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal.active {
-    display: flex;
-}
-
-.modal-slider img {
-    width: 100%;
-    height: auto;
-    max-height: 90vh;
-    object-fit: contain;
+    .back-arrow {
+        padding: 6px 12px;
+        font-size: 16px;
+        border-radius: 8px;
+    }
 }
 
 
@@ -921,4 +963,13 @@
         height: 40px;
         font-size: 1.1rem; /* even smaller for very small screens */
     }
+}
+
+
+* {
+    -webkit-touch-callout: none; /* Prevents iOS quick actions */
+    -webkit-user-select: none;   /* Safari / Chrome Android */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Old IE */
+    user-select: none;           /* Standard */
 }
