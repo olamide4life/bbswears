@@ -48,48 +48,120 @@ setInterval(() => {
 }, 5000);
 
 // MODAL SLIDER (WITH BACK ARROW CLOSE)
-let currentSlide = 0;
-const totalSlides = 2;
+let currentIndex = 0;
+let activeSlides = [];
 
-function openModal(images) {
-    document.getElementById("modal-img1").src = images[0];
-    document.getElementById("modal-img2").src = images[1];
-    currentSlide = 0;
-    updateSlider();
-    document.getElementById("modal").classList.add("active");
-}
+const modal = document.querySelector(".modal");
+const slider = document.querySelector(".modal-slider");
+const dotsContainer = document.querySelector(".modal-dots");
+let isTransitioning = false;
 
-function closeModal() {
-    document.getElementById("modal").classList.remove("active");
-}
+// OPEN MODAL WITH ARRAY
+function openModal(slides) {
+    activeSlides = slides;
+    currentIndex = 0;
 
-function updateSlider() {
-    const slider = document.querySelector('.modal-slider');
-    slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+    slider.innerHTML = "";
+    dotsContainer.innerHTML = "";
 
-    // Update dots
-    document.querySelectorAll('.modal-dots .dot').forEach((dot, i) => {
-        dot.classList.toggle('active', i === currentSlide);
+    slides.forEach((src, i) => {
+        let ext = src.split(".").pop().toLowerCase();
+
+        let wrapper = document.createElement("div");
+        wrapper.style.minWidth = "100%";
+        wrapper.style.display = "flex";
+        wrapper.style.justifyContent = "center";
+
+        if (["mp4", "mov", "webm"].includes(ext)) {
+            let vid = document.createElement("video");
+            vid.src = src;
+            vid.controls = true;
+            vid.style.width = "100%";
+            vid.style.maxHeight = "90vh";
+            wrapper.appendChild(vid);
+        } else {
+            let img = document.createElement("img");
+            img.src = src;
+            wrapper.appendChild(img);
+        }
+
+        slider.appendChild(wrapper);
+
+        // dots
+        let dot = document.createElement("div");
+        dot.classList.add("dot");
+        if (i === 0) dot.classList.add("active");
+        dot.onclick = () => goToSlide(i);
+        dotsContainer.appendChild(dot);
     });
+
+    modal.classList.add("active");
+    updateSlidePosition();
 }
 
-function goToSlide(index) {
-    currentSlide = index;
-    updateSlider();
+// MOVE SLIDER
+function updateSlidePosition() {
+    slider.style.transition = "transform 0.4s ease";
+    slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+    // dot update
+    [...dotsContainer.children].forEach((d, i) => {
+        d.classList.toggle("active", i === currentIndex);
+    });
+
+    // fade animation
+    slider.classList.remove("fade-anim");
+    void slider.offsetWidth; 
+    slider.classList.add("fade-anim");
 }
 
-// TOUCH SWIPE
-let startX = 0, endX = 0;
-const sliderEl = document.querySelector('.modal-slider');
+// Next
+function nextSlide() {
+    if (isTransitioning) return;
+    isTransitioning = true;
 
-sliderEl.addEventListener('touchstart', e => startX = e.touches[0].clientX);
-sliderEl.addEventListener('touchmove', e => endX = e.touches[0].clientX);
-sliderEl.addEventListener('touchend', () => {
-    if (startX - endX > 50) goToSlide((currentSlide + 1) % totalSlides);
-    if (endX - startX > 50) goToSlide((currentSlide - 1 + totalSlides) % totalSlides);
-    startX = 0;
-    endX = 0;
+    currentIndex = (currentIndex + 1) % activeSlides.length;
+    updateSlidePosition();
+
+    setTimeout(() => isTransitioning = false, 450);
+}
+
+// Prev
+function prevSlide() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+
+    currentIndex = (currentIndex - 1 + activeSlides.length) % activeSlides.length;
+    updateSlidePosition();
+
+    setTimeout(() => isTransitioning = false, 450);
+}
+
+// Go to dot slide
+function goToSlide(i) {
+    currentIndex = i;
+    updateSlidePosition();
+}
+
+// Close modal
+function closeModal() {
+    modal.classList.remove("active");
+
+    // stop all videos
+    document.querySelectorAll("video").forEach(v => v.pause());
+}
+
+// Swipe support
+let startX = 0;
+slider.addEventListener("touchstart", e => startX = e.touches[0].clientX);
+slider.addEventListener("touchend", e => {
+    let endX = e.changedTouches[0].clientX;
+    if (startX - endX > 50) nextSlide();
+    else if (endX - startX > 50) prevSlide();
 });
+
+
+
 
 // Close modal on ESC
 document.addEventListener('keydown', e => {
