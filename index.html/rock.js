@@ -8,6 +8,12 @@ document.querySelectorAll('.nav-links a').forEach(link => {
         document.querySelector('.nav-links').classList.remove('active');
     });
 });
+     // DARK AND LIGHT MODAL
+const toggleBtn = document.querySelector(".theme-toggle");
+
+toggleBtn.addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+});
 
 // SMOOTH SCROLL
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -86,6 +92,8 @@ function openModal(slides) {
         }
 
         slider.appendChild(wrapper);
+        
+      
 
         // dots
         let dot = document.createElement("div");
@@ -97,6 +105,10 @@ function openModal(slides) {
 
     modal.classList.add("active");
     updateSlidePosition();
+
+    setModalTheme(currentTheme);
+modal.classList.add("active");
+
 }
 
 // MOVE SLIDER
@@ -298,4 +310,21 @@ document.querySelectorAll(".collection-card").forEach(card => {
         }, 5000);
     });
 });
+
+
+let currentTheme = "dark"; // default theme
+
+function setModalTheme(mode) {
+    modal.classList.remove("light", "dark");
+    modal.classList.add(mode);
+
+    // Update icon
+    document.getElementById("themeIcon").textContent = 
+        mode === "dark" ? "🌙" : "☀️";
+}
+
+function toggleModalTheme() {
+    currentTheme = currentTheme === "dark" ? "light" : "dark";
+    setModalTheme(currentTheme);
+}
 
