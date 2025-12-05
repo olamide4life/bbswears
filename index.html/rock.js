@@ -8,14 +8,45 @@ document.querySelectorAll('.nav-links a').forEach(link => {
         document.querySelector('.nav-links').classList.remove('active');
     });
 });
-     // DARK AND LIGHT MODAL
-const toggleBtn = document.querySelector(".theme-toggle");
 
+// ===============================
+// DARK / LIGHT MODE (GLOBAL + MODAL)
+// ===============================
+
+// your toggle button element
+const toggleBtn = document.querySelector(".theme-toggle");
+const themeIcon = document.getElementById("themeIcon");
+
+// default theme
+let currentTheme = "light";
+
+// apply theme to body + modal
+function applyTheme(mode) {
+    document.body.classList.add("fade-theme"); // smooth fade
+
+    if (mode === "dark") {
+        document.body.classList.add("dark-mode");
+        themeIcon.textContent = "☀️"; // sun
+    } else {
+        document.body.classList.remove("dark-mode");
+        themeIcon.textContent = "🌙"; // moon
+    }
+
+    // remove fade after animation
+    setTimeout(() => {
+        document.body.classList.remove("fade-theme");
+    }, 400);
+}
+
+// toggle theme when clicking button
 toggleBtn.addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
+    currentTheme = currentTheme === "dark" ? "light" : "dark";
+    applyTheme(currentTheme);
 });
 
+// ===============================
 // SMOOTH SCROLL
+// ===============================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -53,7 +84,9 @@ setInterval(() => {
     showTestimonial(currentTestimonial);
 }, 5000);
 
-// MODAL SLIDER (WITH BACK ARROW CLOSE)
+// ===============================
+// MODAL SLIDER (WITH VIDEO SUPPORT)
+// ===============================
 let currentIndex = 0;
 let activeSlides = [];
 
@@ -62,7 +95,7 @@ const slider = document.querySelector(".modal-slider");
 const dotsContainer = document.querySelector(".modal-dots");
 let isTransitioning = false;
 
-// OPEN MODAL WITH ARRAY
+// OPEN MODAL
 function openModal(slides) {
     activeSlides = slides;
     currentIndex = 0;
@@ -92,10 +125,8 @@ function openModal(slides) {
         }
 
         slider.appendChild(wrapper);
-        
-      
 
-        // dots
+        // dot
         let dot = document.createElement("div");
         dot.classList.add("dot");
         if (i === 0) dot.classList.add("active");
@@ -106,28 +137,24 @@ function openModal(slides) {
     modal.classList.add("active");
     updateSlidePosition();
 
-    setModalTheme(currentTheme);
-modal.classList.add("active");
-
+    // ensure modal uses same theme as site
+    applyTheme(currentTheme);
 }
 
-// MOVE SLIDER
+// SLIDER MOVEMENT
 function updateSlidePosition() {
     slider.style.transition = "transform 0.4s ease";
     slider.style.transform = `translateX(-${currentIndex * 100}%)`;
 
-    // dot update
     [...dotsContainer.children].forEach((d, i) => {
         d.classList.toggle("active", i === currentIndex);
     });
 
-    // fade animation
     slider.classList.remove("fade-anim");
-    void slider.offsetWidth; 
+    void slider.offsetWidth;
     slider.classList.add("fade-anim");
 }
 
-// Next
 function nextSlide() {
     if (isTransitioning) return;
     isTransitioning = true;
@@ -138,7 +165,6 @@ function nextSlide() {
     setTimeout(() => isTransitioning = false, 450);
 }
 
-// Prev
 function prevSlide() {
     if (isTransitioning) return;
     isTransitioning = true;
@@ -149,7 +175,6 @@ function prevSlide() {
     setTimeout(() => isTransitioning = false, 450);
 }
 
-// Go to dot slide
 function goToSlide(i) {
     currentIndex = i;
     updateSlidePosition();
@@ -159,11 +184,10 @@ function goToSlide(i) {
 function closeModal() {
     modal.classList.remove("active");
 
-    // stop all videos
     document.querySelectorAll("video").forEach(v => v.pause());
 }
 
-// Swipe support
+// Swipe
 let startX = 0;
 slider.addEventListener("touchstart", e => startX = e.touches[0].clientX);
 slider.addEventListener("touchend", e => {
@@ -172,15 +196,12 @@ slider.addEventListener("touchend", e => {
     else if (endX - startX > 50) prevSlide();
 });
 
-
-
-
-// Close modal on ESC
+// ESC close
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeModal();
 });
 
-// CONTACT FORM SUBMIT ANIMATION
+// CONTACT FORM ANIMATION
 function handleSubmit(e) {
     e.preventDefault();
     const btn = e.target.querySelector('.submit-btn');
@@ -233,16 +254,14 @@ document.querySelectorAll('.gallery-item').forEach(item => {
     });
 });
 
-// Animate collection cards when they enter the viewport (mobile & desktop)
+// COLLECTION CARD ANIMATION
 document.addEventListener("DOMContentLoaded", () => {
   try {
     const cards = document.querySelectorAll(".collection-card");
-    if (!cards || cards.length === 0) return; // nothing to do
+    if (!cards || cards.length === 0) return;
 
-    // If browser doesn't support IntersectionObserver, reveal all cards
     if (!("IntersectionObserver" in window)) {
       cards.forEach(card => {
-        // add data-anim class if present so CSS animation can pick it up
         const anim = card.dataset.anim;
         if (anim) card.classList.add(anim);
         card.classList.add("visible");
@@ -254,29 +273,19 @@ document.addEventListener("DOMContentLoaded", () => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const el = entry.target;
-          // add the data-anim classname (optional) so CSS rules like
-          // .collection-card.visible[data-anim="fade-right"] {...} will run
           const anim = el.dataset.anim;
           if (anim) el.classList.add(anim);
-
-          // then add visible to trigger the animation
           el.classList.add("visible");
-
-          // stop observing this element — one-time animation
           obs.unobserve(el);
         }
       });
-    }, {
-      threshold: 0.18
-    });
+    }, { threshold: 0.18 });
 
-    // observe each card, but guard against any runtime errors per-card
     cards.forEach(card => {
-      try { observer.observe(card); } catch (err) { /* ignore individual observe failures */ }
+      try { observer.observe(card); } catch (err) {}
     });
 
   } catch (e) {
-    // final fallback: reveal everything if something unexpected happens
     const fallbackCards = document.querySelectorAll(".collection-card");
     fallbackCards.forEach(card => {
       const anim = card.dataset.anim;
@@ -287,44 +296,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// GLOW EFFECT
 let activeGlow = null;
 let glowTimeout = null;
 
 document.querySelectorAll(".collection-card").forEach(card => {
     card.addEventListener("click", () => {
 
-        // Stop glow on previous card
         if (activeGlow && activeGlow !== card) {
             activeGlow.classList.remove("glow");
             clearTimeout(glowTimeout);
         }
 
-        // Apply new glow
         card.classList.add("glow");
         activeGlow = card;
 
-        // Remove glow after 5 seconds
         glowTimeout = setTimeout(() => {
             card.classList.remove("glow");
             activeGlow = null;
         }, 5000);
     });
 });
-
-
-let currentTheme = "dark"; // default theme
-
-function setModalTheme(mode) {
-    modal.classList.remove("light", "dark");
-    modal.classList.add(mode);
-
-    // Update icon
-    document.getElementById("themeIcon").textContent = 
-        mode === "dark" ? "🌙" : "☀️";
-}
-
-function toggleModalTheme() {
-    currentTheme = currentTheme === "dark" ? "light" : "dark";
-    setModalTheme(currentTheme);
-}
-
